@@ -1,0 +1,20 @@
+<configuration>
+    <appender name="RCS_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>target/gatling/rcs_requests.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>target/gatling/rcs_requests.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{ISO8601} %-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Solo tu clase -->
+    <logger name="org.example.RcsStressSimulation" level="INFO" additivity="false">
+        <appender-ref ref="RCS_FILE"/>
+    </logger>
+
+    <!-- Resto de logs, como los tengas -->
+    <root level="WARN"/>
+</configuration>
