@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rcs-gatling-run
+  namespace: prueba-gim
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: gatling
+          image: image-registry.openshift-image-registry.svc:5000/prueba-gim/rcs-gatling:latest
+          env:
+            - name: BASE_URL
+              value: "https://botplatform.stg.telefonica.es/bot"
+            - name: REQ_CSV
+              value: "/results/requests.csv"
+            - name: REQ_CSV_FLUSH_EVERY
+              value: "2000"
+            - name: MAVEN_USER_HOME
+              value: "/tmp/.m2"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Duser.home=/tmp"
+          command: ["sh","-lc"]
+          args:
+            - |
+              set -e
+              cd /app
+              mvn -q compile gatling:test \
+                -DbaseUrl="$BASE_URL" \
+                -DreqCsv="$REQ_CSV" \
+                -DreqCsvFlushEvery="$REQ_CSV_FLUSH_EVERY"
+          volumeMounts:
+            - name: results
+              mountPath: /results
+            - name: tmp
+              mountPath: /tmp
+            - name: target
+              mountPath: /app/target
+      volumes:
+        - name: results
+          persistentVolumeClaim:
+            claimName: gatling-results-pvc
+        - name: tmp
+          emptyDir: {}
+        - name: target
+          emptyDir: {}
+
